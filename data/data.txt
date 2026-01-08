@@ -1,0 +1,6 @@
+The dataset (online_retail_II.csv) exceeds GitHub's file size limit.
+
+You can download the original dataset from Kaggle here:
+https://www.kaggle.com/datasets/mashlyn/online-retail-ii-uci
+
+Please download it and place it in this folder to run the notebook.
