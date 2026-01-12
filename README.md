@@ -2,9 +2,9 @@
 
 ## Project Overview
 
-This project focuses on forecasting weekly sales for a UK-based online retailer to optimize inventory levels. The primary business goal is to predict demand 6-8 weeks in advance, allowing the supply chain team to minimize the risk of stockouts (lost revenue) and overstocking (holding costs).
+This project focuses on forecasting weekly sales for a UK-based online retailer to optimize inventory levels. The solution implements a **cloud-integrated data pipeline** to ingest transaction data and predict demand 6-8 weeks in advance.
 
-By accurately modeling demand and analyzing the distribution of forecast errors, this solution aims to reduce Safety Stock requirements by approximately 10%.
+The primary goal is to minimize the risk of stockouts (lost revenue) and overstocking (holding costs). By accurately modeling demand and analyzing the distribution of forecast errors, this solution reduces Safety Stock requirements by approximately 10%.
 
 ## The Business Problem
 
@@ -17,28 +17,30 @@ By accurately modeling demand and analyzing the distribution of forecast errors,
 
 ## Methodology
 
-The analysis followed a structured time series workflow:
+The analysis followed a structured end-to-end workflow:
 
-1.  **Exploratory Data Analysis:**
+1.  **Cloud Data Ingestion (AWS S3):**
+    -   Architected a data extraction pipeline using **AWS S3** and **Boto3**.
+    -   Automated the ingestion of 500k+ raw transaction records from cloud storage to a local environment for downstream analysis.
 
-    - Identified multiplicative seasonality where variance increased with the trend.
-    - Applied Log-Transformation to stabilize variance and satisfy homoscedasticity assumptions.
-    - Confirmed stationarity using the Augmented Dickey-Fuller (ADF) test.
+2.  **Exploratory Data Analysis:**
+    -   Identified multiplicative seasonality where variance increased with the trend.
+    -   Applied Log-Transformation to stabilize variance and satisfy homoscedasticity assumptions.
+    -   Confirme stationarity using the Augmented Dickey-Fuller (ADF) test.
 
-2.  **Model Development:**
+3.  **Model Development:**
+    -   **Baseline:** Implemented a Naive Forecast as a performance benchmark.
+    -   **Statistical (SARIMA):** Modeled using Seasonal ARIMA with order (1, 0, 1) x (1, 1, 1, 52). While accurate, it struggled with store closures.
+    -   **Machine Learning (Prophet):** Implemented Facebook Prophet with custom holiday regressors to account for UK public holidays and seasonal shutdowns.
 
-    - **Baseline:** Implemented a Naive Forecast (predicting next week's sales equals this week's sales) as a performance benchmark.
-    - **Statistical (SARIMA):** Modeled using Seasonal ARIMA with order (1, 0, 1) x (1, 1, 1, 52). While accurate, it struggled with store closures.
-    - **Machine Learning (Prophet):** Implemented Facebook Prophet with custom holiday regressors to account for UK public holidays and seasonal shutdowns.
-
-3.  **Optimization:**
-    - Performed Grid Search Cross-Validation on Prophet to tune `changepoint_prior_scale` and `seasonality_prior_scale`.
+4.  **Optimization:**
+    -   Performed Grid Search Cross-Validation on Prophet to tune `changepoint_prior_scale` and `seasonality_prior_scale`.
 
 ## Model Comparison & Results
 
 | Model       | Performance Note     | Issue Identified                                                                                                          |
 | :---------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------ |
-| **SARIMA**  | Lowest MAPE          | **Bimodal Residuals:** The model failed to account for store closures (zero sales), creating a biased error distribution. |
+| **SARIMA** | Lowest MAPE          | **Bimodal Residuals:** The model failed to account for store closures (zero sales), creating a biased error distribution. |
 | **Prophet** | Slightly higher MAPE | **Unbiased Residuals:** Effectively handled holidays and closures, resulting in a normal error distribution.              |
 
 ## Conclusion & Business Decision
@@ -53,7 +55,7 @@ Although SARIMA achieved a slightly lower raw error rate (MAPE), **Prophet was s
 
 ## Tech Stack
 
-- **Language:** Python
+- **Cloud & Engineering:** AWS S3, Boto3, Python
 - **Time Series:** Statsmodels (SARIMA), Prophet, PMDARIMA (Auto-ARIMA)
 - **Analysis:** Pandas, NumPy, Scikit-learn (Metrics)
 - **Visualization:** Matplotlib, Seaborn (ACF/PACF plots, Residual Analysis)
@@ -63,18 +65,15 @@ Although SARIMA achieved a slightly lower raw error rate (MAPE), **Prophet was s
 To replicate this analysis:
 
 1.  Clone the repository:
-
     ```bash
     git clone [https://github.com/RohanDey11/Retail-Demand-Forecasting-and-inventory-optimization.git](https://github.com/RohanDey11/Retail-Demand-Forecasting-and-inventory-optimization.git)
     ```
 
 2.  Install dependencies:
-
     ```bash
     pip install -r requirements.txt
     ```
-
 3.  Run the notebook:
     ```bash
-    jupyter notebook notebooks/Retail Demand Forecasting and inventory optimization.ipynb
+    jupyter notebook notebooks/Retail\ Demand\ Forecasting\ and\ inventory\ optimization.ipynb
     ```
